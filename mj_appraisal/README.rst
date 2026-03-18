@@ -91,7 +91,7 @@ Installation
 Author
 ====================================
 
-Developed by Majesto
+Developed by Musleh Uddin Juned
 
 ====================================
 License
