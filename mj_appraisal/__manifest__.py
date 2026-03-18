@@ -5,7 +5,7 @@
     'category': 'Human Resources',
     'summary': 'Manage employee performance appraisals',
     'description': 'Module to manage performance appraisals for employees including appraisers and scoring.',
-    'author': 'Juned',
+    'author': 'Musleh Uddin Juned',
     'website': 'http://www.zachai-bachhai.com',
     'depends': ['base', 'hr', 'mail'],
     'data': [
