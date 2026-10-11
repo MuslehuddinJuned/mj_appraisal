@@ -5,13 +5,19 @@ from odoo.exceptions import AccessError, ValidationError, UserError
 class PerformanceAppraiser(models.Model):
     _name = 'performance.appraiser'
     _description = 'Performance Appraiser'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _inherit = ['mail.thread', 'mail.activity.mixin',
+                'performance.appraisal.access.mixin']
     _rec_name = 'name'
+
+    # An appraiser-only user may only push score edits down to their lines;
+    # the line model then restricts that to the "score" field itself.
+    _appraiser_writable_fields = ('performance_appraiser_line_ids',)
+    _appraiser_recomputed_fields = ('score', 'total_weightage', 'name', 'state')
 
     performance_appraisal_id = fields.Many2one(
         'performance.appraisal',
         ondelete='cascade',
-        copy=False 
+        copy=False, tracking=True
     )
     name = fields.Many2one(
         'hr.employee',
@@ -19,12 +25,12 @@ class PerformanceAppraiser(models.Model):
         store=True,
         readonly=True,
         string="Appraisee",
-        copy=False 
+        copy=False, tracking=True
     )
     appraiser_id = fields.Many2one(
         'hr.employee',
         string="Allowed Appraisers",
-        required=True
+        required=True, tracking=True
     )
 
     weightage = fields.Integer(
@@ -37,13 +43,19 @@ class PerformanceAppraiser(models.Model):
     score = fields.Float(
         compute='_compute_appraiser_score',
         store=True,
-        copy=False 
+        copy=False
+    )
+
+    comments = fields.Text(
+        string="Appraiser Comments",
+        help="Comments provided by the appraiser regarding the performance appraisal.",
+        tracking=True
     )
 
     performance_appraiser_line_ids = fields.One2many(
         'performance.appraiser.line',
         'performance_appraiser_id',
-        copy=False 
+        copy=False
     )
 
     state = fields.Selection(
@@ -58,26 +70,30 @@ class PerformanceAppraiser(models.Model):
         store=True
     )
 
-    
+
 
     # -------------------------------------------------
     # COMPUTES
     # -------------------------------------------------
+    # NOTE: the aggregations below run in sudo on purpose. Appraisers only see
+    # their own rows, and computing a *stored* total from a record-rule
+    # filtered set would persist a wrong value for everybody else.
     @api.depends('performance_appraiser_line_ids.weightage')
     def _compute_total_weightage(self):
         for rec in self:
             rec.total_weightage = sum(
-                rec.performance_appraiser_line_ids.mapped('weightage')
+                rec.sudo().performance_appraiser_line_ids.mapped('weightage')
             )
 
-    
+
     @api.constrains('performance_appraiser_line_ids', 'performance_appraiser_line_ids.weightage')
     def _check_total_weightage(self):
         for rec in self:
-            if not rec.performance_appraiser_line_ids:
+            lines = rec.sudo().performance_appraiser_line_ids
+            if not lines:
                 continue
 
-            total = sum(rec.performance_appraiser_line_ids.mapped('weightage'))
+            total = sum(lines.mapped('weightage'))
             if float_compare(total, 100.0, precision_digits=2) != 0:
                 raise ValidationError(
                     _("Total allocated points must be 100. Current total: %s")
@@ -95,16 +111,20 @@ class PerformanceAppraiser(models.Model):
     @api.depends('performance_appraiser_line_ids.score',
                  'performance_appraiser_line_ids.weightage', 'weightage')
 
-    
+
     def _compute_appraiser_score(self):
         for rec in self:
-            lines = rec.performance_appraiser_line_ids
+            lines = rec.sudo().performance_appraiser_line_ids
             weighted_score = sum(l.score for l in lines)
             if not weighted_score:
                 rec.score = 0.0
                 continue
 
             rec.score = weighted_score * rec.weightage / 100
+
+    def _appraiser_state(self):
+        self.ensure_one()
+        return self.sudo().state
 
     def copy(self, default=None):
         self.ensure_one()
@@ -114,9 +134,11 @@ class PerformanceAppraiser(models.Model):
         new_appraisal = super().copy(default)
 
         # ---- Step 2: duplicate appraisers
+        # tracking_disable keeps the duplicate's chatter clean: the copied
+        # lines are not real edits, so they must not be logged as such.
         for appraiser in self.performance_appraiser_line_ids:
-            new_appraiser = appraiser.copy({
+            new_appraiser = appraiser.with_context(tracking_disable=True).copy({
                 'performance_appraiser_id': new_appraisal.id,
             })
-            
+
         return new_appraisal
