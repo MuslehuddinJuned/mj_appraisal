@@ -13,6 +13,7 @@
     'website': 'http://www.zachai-bachhai.com',
     'depends': ['base', 'hr', 'mail'],
     'data': [
+        'security/appraisal_security.xml',
         'security/ir.model.access.csv',
         'reports/report.xml',
         'reports/report_performance_appraisal.xml',

@@ -28,10 +28,15 @@
                                 
                             </tr>
                             <tr>
-                                <td><strong>Final Score</strong></td>
-                                <td><span t-esc="o.score"/></td>
                                 <td><strong>Appraisal Date</strong></td>
                                 <td><span t-esc="o.appraisal_date"/></td>
+                                <td><strong>Final Score</strong></td>
+                                <td><span t-esc="'%.2f' % o.score"/></td>
+                                
+                            </tr>
+                            <tr>
+                                <td><strong>Comments</strong></td>
+                                <td colspan="3"><span t-esc="o.comments"/></td>
                             </tr>
                         </table>
 
@@ -45,7 +50,11 @@
 
                             <p>
                                 <strong>Score:</strong>
-                                <span t-esc="appraiser.score"/>/<span t-esc="appraiser.weightage"/>
+                                <span t-if="appraiser.score and appraiser.weightage"> <span t-esc="appraiser.score"/> / <span t-esc="appraiser.weightage"/></span>; 
+                                <span t-if="appraiser.comments" t-esc="appraiser.comments"/>
+                            </p>
+                            <p>
+                                
                             </p>
 
                             <table class="table table-bordered table-sm">
