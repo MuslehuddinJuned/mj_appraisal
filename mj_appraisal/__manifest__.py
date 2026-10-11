@@ -1,7 +1,7 @@
 
 {
     'name': 'Performance Appraisal',
-    'version': '18.0.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Human Resources',
     'summary': 'Manage employee performance appraisals',
     'description': """
@@ -14,7 +14,7 @@
     'depends': ['base', 'hr', 'mail'],
     'data': [
         'security/appraisal_security.xml',
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
         'reports/report.xml',
         'reports/report_performance_appraisal.xml',
         'views/performance_appraisal_views.xml',

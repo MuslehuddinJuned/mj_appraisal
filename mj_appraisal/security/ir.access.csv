@@ -1,0 +1,15 @@
+id,name,model_id,group_id/id,operation,domain
+access_performance_appraisal_viewer,Performance Appraisal: viewer reads all,performance.appraisal,mj_appraisal.group_performance_appraisal_viewer,r,
+access_performance_appraiser_viewer,Performance Appraiser: viewer reads all,performance.appraiser,mj_appraisal.group_performance_appraisal_viewer,r,
+access_performance_appraiser_line_viewer,Performance Appraiser Line: viewer reads all,performance.appraiser.line,mj_appraisal.group_performance_appraisal_viewer,r,
+access_performance_evaluation_topic_viewer,Evaluation Topic: viewer reads all,performance.evaluation.topic,mj_appraisal.group_performance_appraisal_viewer,r,
+access_hr_employee_appraisal_viewer,Employee: appraisal viewer reads,hr.employee,mj_appraisal.group_performance_appraisal_viewer,r,
+access_performance_appraisal_manager,Performance Appraisal: manager,performance.appraisal,mj_appraisal.group_performance_appraisal_manager,cru,
+access_performance_appraiser_manager,Performance Appraiser: manager,performance.appraiser,mj_appraisal.group_performance_appraisal_manager,crud,
+access_performance_appraiser_line_manager,Performance Appraiser Line: manager,performance.appraiser.line,mj_appraisal.group_performance_appraisal_manager,crud,
+access_performance_evaluation_topic_manager,Evaluation Topic: manager,performance.evaluation.topic,mj_appraisal.group_performance_appraisal_manager,crud,
+access_performance_appraisal_appraiser,Performance Appraisal: only the ones I appraise,performance.appraisal,mj_appraisal.group_performance_appraisal_appraiser,ru,"[('performance_appraiser_ids.appraiser_id.user_id', '=', user.id)]"
+access_performance_appraiser_appraiser,Performance Appraiser: only my own evaluations,performance.appraiser,mj_appraisal.group_performance_appraisal_appraiser,ru,"[('appraiser_id.user_id', '=', user.id)]"
+access_performance_appraiser_line_appraiser,Performance Appraiser Line: only my own evaluation lines,performance.appraiser.line,mj_appraisal.group_performance_appraisal_appraiser,ru,"[('performance_appraiser_id.appraiser_id.user_id', '=', user.id)]"
+access_performance_evaluation_topic_appraiser,Evaluation Topic: appraiser reads all,performance.evaluation.topic,mj_appraisal.group_performance_appraisal_appraiser,r,
+access_hr_employee_appraisal_appraiser,Employee: appraiser reads,hr.employee,mj_appraisal.group_performance_appraisal_appraiser,r,
